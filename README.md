@@ -28,4 +28,4 @@ Chatify is a sleek and intuitive real-time messaging app designed to keep you co
 
 4. Run the server:
    ```bash
-   npm run start
+   npm run dev
