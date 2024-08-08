@@ -4,17 +4,84 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
+import { toast } from 'sonner'
+import apiClient from '@/lib/api-client'
+import { LOGIN_ROUTE, SIGNUP_ROUTE } from '@/utils/constants'
+import { useNavigate } from 'react-router-dom'
 
 
 function Auth() {
-
+    const navigate = useNavigate()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
 
+    const validateLogin = () => {
+        if (!email.length) {
+            toast.error("Arre yaar email to daal.")
+            return false
+        }
+        if (!password.length) {
+            toast.error("Passwordwa nahi daaloge kya.")
+            return false
+        }
+        return true
+    }
 
-    const handleLogin = async () => { }
-    const handleSignup = async () => { }
+    const validateSignup = () => {
+        if (!email.length) {
+            toast.error("Arre yaar email to daal.")
+            return false
+        }
+        if (!password.length) {
+            toast.error("Passwordwa nahi daaloge kya.")
+            return false
+        }
+
+        if (password !== confirmPassword) {
+            toast.error("Passwordwa aur Confirm Passwordwa milat nahi ba.")
+            return false
+        }
+
+        return true
+    }
+
+    const handleLogin = async () => { 
+        if (!validateLogin()) {
+            return;
+        }
+
+        const response = await apiClient.post(
+            LOGIN_ROUTE, { email, password },
+            { withCredentials: true }
+        )
+
+        if(response.data.user.id){
+            if(response.data.user.profileSetup){
+                navigate('/chat')
+            }else{
+                navigate('/profile')
+            }
+        }
+
+        console.log(response);
+    }
+
+    const handleSignup = async () => {
+        if (!validateSignup()) {
+            return;
+        }
+
+        const response = await apiClient.post(
+            SIGNUP_ROUTE, { email, password },
+            { withCredentials: true }
+        )
+
+        if(response.status === 201){
+            navigate('/profile')
+        }
+
+    }
 
     return (
         <div className='w-screen h-screen flex items-center justify-center'>
@@ -33,7 +100,7 @@ function Auth() {
                         </p>
                     </div>
                     <div className='flex items-center justify-center w-full'>
-                        <Tabs className='w-3/4'>
+                        <Tabs className='w-3/4' defaultValue='login'>
                             <TabsList className="bg-transparent rounded-none w-full">
                                 <TabsTrigger value="login" className="data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-medium data-[state=active]:border-b-pink-500 p-3 transition-all duration-300">Login</TabsTrigger>
                                 <TabsTrigger value="signup" className="data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-medium data-[state=active]:border-b-pink-500 p-3 transition-all duration-300">Signup</TabsTrigger>
